@@ -118,9 +118,58 @@ df%>%
 
 #d. Preguntas-------------------------------------------------------------------------------------------------------------
 
+#¿Los clientes son recurrentes o solo compran en una ocasión? 
+sum(is.na(df$CustomerID))
+
+df%>%
+  distinct(InvoiceNo, CustomerID)%>%
+  group_by(CustomerID)%>%
+  count()%>%
+  arrange(desc(n))%>%
+  ggplot(aes(x=CustomerID, y=n))+
+  geom_col()
+
+
 #   ¿Los precios se comportan diferentes según la región?
-df2 <- mutate(df, Region = (countrycode(sourcevar = df2$Country, origin = "country.name",destination = "region")))
+df2 <- mutate(df, Region = (countrycode(sourcevar = df$Country, origin = "country.name",destination = "region")))
 df2$Region <- as.factor(df2$Region)   
+
+
+#¿La cantidad de productos diferentes que compran los clientes varían por región? 
+df2%>%
+  distinct(StockCode, Region)%>%
+  group_by(Region)%>%
+  count()%>%
+  ggplot(aes(x=Region, y=n))+
+  geom_col()
+  
+
+#Como se comporta la cantidad de usuarios por pais?
+df2%>%
+  distinct(Country, CustomerID)%>%
+  group_by(Country)%>%
+  count()%>%
+  arrange(desc(n))%>%
+  ggplot(aes(x=reorder(Country, n), y=n))+
+  geom_col()+
+  coord_flip()
+  
+  
+#¿Como se ha comportado el precio de los top 10 productos a lo largo del tiempo?
+tp10<-df2%>% 
+  group_by(StockCode) %>% 
+  count()%>%
+  arrange(desc(n)) %>%
+  head(10)
+
+df2%>%
+  filter(StockCode %in% tp10$StockCode)%>%
+  distinct(StockCode, date, UnitPrice)%>%
+    ggplot(aes(x=month(date), y=UnitPrice))+
+  geom_line()+
+  geom_point()+
+  geom_smooth()+
+  facet_wrap(~ StockCode, scales = "free_y")
 
 
 
@@ -129,21 +178,6 @@ df2$Region <- as.factor(df2$Region)
 #   a. Clustering (recomendación aplicarlo a clientes) 
 #   b. Association rules
 
-
-
-
-
-
-
-#d
-#¿Los clientes son recurrentes o solo compran en una ocasión? 
-sum(is.na(df$CustomerID))
-
-df%>%
-  distinct(InvoiceNo, CustomerID)%>%
-  group_by(CustomerID)%>%
-  count()%>%
-  arrange(desc(n))
 
 
 
