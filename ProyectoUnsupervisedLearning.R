@@ -14,7 +14,7 @@ library('lubridate')
 #                                          #
 #                                          #
 ############################################
-df<-read.xlsx("Online Retail.xlsx", 1, header = T)
+df<-read.xlsx2("Online Retail.xlsx", sheetIndex = 1, header = T, rows=10)
 
 
 #a. ¿Qué tipos de datos identificamos? 
