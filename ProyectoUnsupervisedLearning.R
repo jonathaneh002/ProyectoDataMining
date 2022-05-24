@@ -48,5 +48,15 @@ df%>%
 
 
 
+#d
+#¿Los clientes son recurrentes o solo compran en una ocasión? 
+sum(is.na(df$CustomerID))
+
+df%>%
+  distinct(InvoiceNo, CustomerID)%>%
+  group_by(CustomerID)%>%
+  count()%>%
+  arrange(desc(n))
+
 
 
