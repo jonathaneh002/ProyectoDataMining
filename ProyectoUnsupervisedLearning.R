@@ -2,7 +2,7 @@
 library("ggplot2")
 library("dplyr")
 library('lubridate')
-library(openxlsx)
+library(readxl)
 
 ############################################
 #                                          #
@@ -13,7 +13,8 @@ library(openxlsx)
 #                                          #
 #                                          #
 ############################################
-df<-read.xlsx("Online Retail.xlsx", sheetIndex = 1, header = T, rows=10)
+
+df<- read_excel("Online Retail.xlsx")
 
 
 
