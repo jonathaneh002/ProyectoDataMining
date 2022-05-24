@@ -14,3 +14,14 @@ library('lubridate')
 #                                          #
 #                                          #
 ############################################
+
+
+
+#a. ¿Qué tipos de datos identificamos? 
+#b. ¿Cuál es la distribución de las variables univariadas? 
+#c. Presentar por lo menos 2 tablas de contingencia que relacionen las variables. 
+#d. Preguntas
+#e. Presentar gráficas para responder las preguntas planteadas en elpunto anterior
+#f. Modelos:
+#   a. Clustering (recomendación aplicarlo a clientes) 
+#   b. Association rules
