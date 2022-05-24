@@ -2,6 +2,7 @@
 library("ggplot2")
 library("dplyr")
 library('lubridate')
+library(openxlsx)
 
 
 
@@ -14,7 +15,7 @@ library('lubridate')
 #                                          #
 #                                          #
 ############################################
-df<-read.xlsx2("Online Retail.xlsx", sheetIndex = 1, header = T, rows=10)
+df<-read.xlsx("Online Retail.xlsx", sheetIndex = 1, header = T, rows=10)
 
 
 #a. ¿Qué tipos de datos identificamos? 
