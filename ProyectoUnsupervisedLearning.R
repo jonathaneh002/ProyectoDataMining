@@ -13,7 +13,7 @@ library('lubridate')
 #                                          #
 #                                          #
 ############################################
-
+df<-read.xlsx2("Online Retail.xlsx", sheetIndex = 1, header = T, rows=10)
 
 
 
@@ -25,3 +25,5 @@ library('lubridate')
 #f. Modelos:
 #   a. Clustering (recomendación aplicarlo a clientes) 
 #   b. Association rules
+
+
