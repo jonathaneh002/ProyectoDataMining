@@ -4,8 +4,6 @@ library("dplyr")
 library('lubridate')
 library(openxlsx)
 
-
-
 ############################################
 #                                          #
 #                                          #
@@ -16,6 +14,7 @@ library(openxlsx)
 #                                          #
 ############################################
 df<-read.xlsx("Online Retail.xlsx", sheetIndex = 1, header = T, rows=10)
+
 
 
 #a. ¿Qué tipos de datos identificamos? 
