@@ -15,6 +15,7 @@ library(readxl)
 ############################################
 
 df<- read_excel("Online Retail.xlsx")
+df$date<-as.Date(df$InvoiceDate)
 
 
 
@@ -34,7 +35,16 @@ levels(df$Country)
 
 
 #c)
+df%>%
+  distinct(InvoiceNo, Country)%>%
+  group_by(Country)%>%
+  count()%>%
+  arrange(desc(n))
 
+df%>%
+  group_by(StockCode)%>%
+  count()%>%
+  arrange(desc(n))
 
 
 
