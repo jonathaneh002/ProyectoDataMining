@@ -13,6 +13,7 @@ library(readxl)
 #                                          #
 #                                          #
 ############################################
+
 df<- read_excel("Online Retail.xlsx")
 df$StockCode <- as.factor(df$StockCode)
 df$CustomerID <- as.factor(df$CustomerID)
