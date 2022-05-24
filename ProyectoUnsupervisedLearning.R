@@ -15,9 +15,9 @@ library(readxl)
 ############################################
 
 df<- read_excel("Online Retail.xlsx")
-df$StockCode <- as.factor(df$StockCode)
-df$CustomerID <- as.factor(df$CustomerID)
-df$Country <- as.factor(df$Country)
+df$date<-as.Date(df$InvoiceDate)
+
+
 
 #a. ¿Qué tipos de datos identificamos? 
 #b. ¿Cuál es la distribución de las variables univariadas?
@@ -104,5 +104,26 @@ df %>%
 #f. Modelos:
 #   a. Clustering (recomendación aplicarlo a clientes) 
 #   b. Association rules
+
+
+#a)
+str(df)
+levels(df$Country)
+
+
+#c)
+df%>%
+  distinct(InvoiceNo, Country)%>%
+  group_by(Country)%>%
+  count()%>%
+  arrange(desc(n))
+
+df%>%
+  group_by(StockCode)%>%
+  count()%>%
+  arrange(desc(n))
+
+
+
 
 
