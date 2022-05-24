@@ -3,6 +3,7 @@ library("ggplot2")
 library("dplyr")
 library('lubridate')
 library(readxl)
+library(countrycode)
 
 ############################################
 #                                          #
@@ -19,8 +20,12 @@ df$date<-as.Date(df$InvoiceDate)
 
 
 
-#a. ¿Qué tipos de datos identificamos? 
-#b. ¿Cuál es la distribución de las variables univariadas?
+#a. ¿Qué tipos de datos identificamos? -------------------------------------------------------------
+
+str(df)
+levels(df$Country)
+
+#b. ¿Cuál es la distribución de las variables univariadas? -----------------------------------------
 
 summary(df)
 
@@ -98,20 +103,8 @@ df %>%
   coord_polar("y", start=0) +
   ggtitle('Transacciones por pais')
 
-#c. Presentar por lo menos 2 tablas de contingencia que relacionen las variables. 
-#d. Preguntas
-#e. Presentar gráficas para responder las preguntas planteadas en elpunto anterior
-#f. Modelos:
-#   a. Clustering (recomendación aplicarlo a clientes) 
-#   b. Association rules
+#c. Presentar por lo menos 2 tablas de contingencia que relacionen las variables. -------------------------------------------
 
-
-#a)
-str(df)
-levels(df$Country)
-
-
-#c)
 df%>%
   distinct(InvoiceNo, Country)%>%
   group_by(Country)%>%
@@ -122,6 +115,23 @@ df%>%
   group_by(StockCode)%>%
   count()%>%
   arrange(desc(n))
+
+#d. Preguntas-------------------------------------------------------------------------------------------------------------
+
+#   ¿Los precios se comportan diferentes según la región?
+df2 <- mutate(df, Region = (countrycode(sourcevar = df2$Country, origin = "country.name",destination = "region")))
+df2$Region <- as.factor(df2$Region)   
+
+
+
+#e. Presentar gráficas para responder las preguntas planteadas en elpunto anterior----------------------------------------
+#f. Modelos:--------------------------------------------------------------------------------------------------------------
+#   a. Clustering (recomendación aplicarlo a clientes) 
+#   b. Association rules
+
+
+
+
 
 
 
