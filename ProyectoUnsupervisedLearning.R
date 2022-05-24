@@ -14,7 +14,7 @@ library('lubridate')
 #                                          #
 #                                          #
 ############################################
-
+df<-read.xlsx("Online Retail.xlsx", 1, header = T)
 
 
 #a. ¿Qué tipos de datos identificamos? 
@@ -25,3 +25,5 @@ library('lubridate')
 #f. Modelos:
 #   a. Clustering (recomendación aplicarlo a clientes) 
 #   b. Association rules
+
+
