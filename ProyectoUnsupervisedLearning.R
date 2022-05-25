@@ -157,15 +157,17 @@ df2%>%
   
 #¿Como se ha comportado el precio de los top 10 productos a lo largo del tiempo?
 tp10<-df2%>% 
-  group_by(StockCode) %>%
+  group_by(StockCode) %>% 
+  count()%>%
   arrange(desc(n)) %>%
   head(10)
 
 df2%>%
   filter(StockCode %in% tp10$StockCode)%>%
   distinct(StockCode, date, UnitPrice)%>%
-  #mutate(nombre)
-    ggplot(aes(x=(date), y=UnitPrice))+
+    ggplot(aes(x=month(date), y=UnitPrice))+
+  geom_line()+
+  geom_point()+
   geom_smooth()+
   facet_wrap(~ StockCode, scales = "free_y")
 
