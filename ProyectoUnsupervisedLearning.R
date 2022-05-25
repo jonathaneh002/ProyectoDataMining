@@ -4,6 +4,7 @@ library("dplyr")
 library('lubridate')
 library(readxl)
 library(countrycode)
+library(arules)
 
 ############################################
 #                                          #
@@ -165,19 +166,26 @@ tp10<-df2%>%
 df2%>%
   filter(StockCode %in% tp10$StockCode)%>%
   distinct(StockCode, date, UnitPrice)%>%
-    ggplot(aes(x=month(date), y=UnitPrice))+
-  geom_line()+
-  geom_point()+
-  geom_smooth()+
-  facet_wrap(~ StockCode, scales = "free_y")
+  ggplot(aes(x=month(date), y=UnitPrice))+
+    geom_smooth()+
+    facet_wrap(~ StockCode, scales = "free_y")
 
 
 
 #e. Presentar gráficas para responder las preguntas planteadas en elpunto anterior----------------------------------------
 #f. Modelos:--------------------------------------------------------------------------------------------------------------
 #   a. Clustering (recomendación aplicarlo a clientes) 
+
 #   b. Association rules
-
-
-
+df2$StockCode=factor(df2$StockCode)
+df2$InvoiceNo=factor(df2$InvoiceNo)
+sp<-split(df2$StockCode, df2$InvoiceNo)
+trans<-as(sp, "transactions")
+inspect(trans[1:5])
+itemFrequencyPlot(trans, topN = 20)
+itemFrequencyPlot(trans, support = 0.05)
+image(sample(trans, 1000))
+rules<-apriori(trans, parameter=list(suppor=0.025, confidence = 0.3, minlen=2))
+summary(rules)
+inspect(sort(rules, by="lift"))
 
