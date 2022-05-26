@@ -9,6 +9,10 @@ library(purrr)
 library(dendextend)
 library(cluster)
 library(weights)
+library(arules)
+library(ggmap)
+library(geosphere)
+
 
 ############################################
 #                                          #
@@ -42,13 +46,12 @@ StockCode_head <- df %>%
 
 StockCode_head <- as.data.frame(StockCode_head)
 
-ggplot(StockCode_head, aes(x=as.factor(StockCode), y=n)) +
+ggplot(StockCode_head, aes(x=StockCode, y=n)) +
   geom_col(fill=rgb(0.1,0.4,0.5,0.7)) +
   xlab('Codigo de Producto') +
   ylab('Cantidad')+
   ggtitle('25 productos mas comprados')
   
-#-----------------------------------------------------------------
 
 #Quantity
 Quantity <- df %>% 
@@ -59,22 +62,20 @@ Quantity <- df %>%
 
 Quantity <- as.data.frame(Quantity)
 
-ggplot(Quantity, aes(x=as.factor(Quantity), y=n))+
+ggplot(Quantity, aes(x=Quantity, y=n))+
   geom_col(fill=rgb(0.1,0.4,0.5,0.7), color= 'white') +
   xlab('Cantidad') +
   ylab('Cuenta')+
   ggtitle('25 cantidades más compradas')
 
-#-----------------------------------------------------------------
 
 #InvoiceDate
 max(df$InvoiceDate)
 min(df$InvoiceDate)
 
-df2 <- mutate(df2, Date = date(df$InvoiceDate))
+df2 <- mutate(df, Date = date(df$InvoiceDate))
 
 df2 %>% 
-  distinct(Date, InvoiceNo) %>%
   group_by(Date) %>%
   count() %>%
   arrange(desc(n)) %>%
@@ -84,7 +85,7 @@ df2 %>%
   ylab('Transacciones')+
   ggtitle('Transacciones por fecha')
  
-#-----------------------------------------------------------------
+
 
 #UnitPrice
 summary(df$UnitPrice)
@@ -96,21 +97,19 @@ ggplot(df, aes(x=UnitPrice)) +
   xlab('Precio')+
   ggtitle('Distribucion de precios')
 
-#-----------------------------------------------------------------
+ggplot(ToothGrowth, aes(x=dose, y=len, color=dose)) +
+  geom_boxplot()
 
 #Country
 
 df %>%
-  distinct(InvoiceNo, Country) %>%
   group_by(Country) %>%
   count() %>%
   arrange(desc(n)) %>%
   ggplot(aes(x='', y = n, fill= Country))+
   geom_bar(stat="identity", width=1, color="white") +
-  coord_polar("y") +
+  coord_polar("y", start=0) +
   ggtitle('Transacciones por pais')
-
-#-----------------------------------------------------------------
 
 #c. Presentar por lo menos 2 tablas de contingencia que relacionen las variables. -------------------------------------------
 
@@ -119,15 +118,13 @@ df%>%
   group_by(Country)%>%
   count()%>%
   arrange(desc(n))
-#-----------------------------------------------------------------
 
 df%>%
   group_by(StockCode)%>%
   count()%>%
   arrange(desc(n))
-#-----------------------------------------------------------------
 
-#d. Preguntas y graficas -----------------------------------------------------------------------------------------------------
+#d. Preguntas-------------------------------------------------------------------------------------------------------------
 
 #¿Los clientes son recurrentes o solo compran en una ocasión? 
 sum(is.na(df$CustomerID))
@@ -140,20 +137,11 @@ df%>%
   ggplot(aes(x=CustomerID, y=n))+
   geom_col()
 
-#-----------------------------------------------------------------
 
 #   ¿Los precios se comportan diferentes según la región?
 df2 <- mutate(df, Region = (countrycode(sourcevar = df$Country, origin = "country.name",destination = "region")))
 df2$Region <- as.factor(df2$Region)   
 
-
-
-ggplot(df2, aes(y=UnitPrice))+
-  geom_boxplot(fill=rgb(0.1,0.4,0.5,0.7), color="black")+ 
-  ylim(0, 15) + 
-  facet_grid(. ~ Region)
-
-#-----------------------------------------------------------------
 
 #¿La cantidad de productos diferentes que compran los clientes varían por región? 
 
@@ -162,7 +150,11 @@ df2%>%
   group_by(Region)%>%
   count()%>%
   ggplot(aes(x=Region, y=n))+
-  geom_col()
+  geom_col()+
+  labs(y="Cantidad")+
+  ggtitle("Cantidad de productos diferentes por region")+
+  theme_bw()
+
 #-----------------------------------------------------------------
 
 #¿Las ventas presentan alguna estacionalidad por mes? 
@@ -238,10 +230,10 @@ df2%>%
   arrange(desc(n))%>%
   ggplot(aes(x=reorder(Country, n), y=n))+
   geom_col()+
-  coord_flip()
-
-#-----------------------------------------------------------------
-
+  coord_flip()+
+  labs(x="Country", y="Cantidad")
+  
+  
 #¿Como se ha comportado el precio de los top 10 productos a lo largo del tiempo?
 tp10<-df2%>% 
   group_by(StockCode) %>% 
@@ -253,13 +245,14 @@ df2%>%
   filter(StockCode %in% tp10$StockCode)%>%
   distinct(StockCode, date, UnitPrice)%>%
   ggplot(aes(x=month(date), y=UnitPrice))+
-  geom_line()+
-  geom_point()+
-  geom_smooth()+
-  facet_wrap(~ StockCode, scales = "free_y")
+    geom_smooth()+
+    facet_wrap(~ StockCode, scales = "free_y")+
+    labs(x="mes")+
+    ggtitle("Linea del tiempo de precio de los top 10 productos")
 
-#-----------------------------------------------------------------
 
+
+#e. Presentar gráficas para responder las preguntas planteadas en elpunto anterior----------------------------------------
 #f. Modelos:--------------------------------------------------------------------------------------------------------------
 #   a. Clustering (recomendación aplicarlo a clientes) 
 
@@ -485,8 +478,60 @@ Resumen = segment_customers %>%
 Resumen
 
 #-------------------------------------------------------------------------------------------------------------#
-#   b. Association rules
 
+#   b. Association rules
+df2$StockCode=factor(df2$StockCode)
+df2$InvoiceNo=factor(df2$InvoiceNo)
+sp<-split(df2$StockCode, df2$InvoiceNo)
+trans<-as(sp, "transactions")
+inspect(trans[1:5])
+itemFrequencyPlot(trans, topN = 20)
+itemFrequencyPlot(trans, support = 0.05)
+image(sample(trans, 1000))
+rules<-apriori(trans, parameter=list(suppor=0.025, confidence = 0.2, minlen=2))
+summary(rules)
+inspect(sort(rules, by="lift"))
+rulesdf<-as(rules, "data.frame")
+
+#3 geografia analitica
+#a ventas
+apikey = "AIzaSyAzIPOLbTCkY-vMQtQJ7nXNk3ytvs8NlSU"
+
+register_google(key = apikey)
+
+ventas<-df2%>%
+  distinct(Country, InvoiceNo)%>%
+  group_by(Country)%>%
+  count()
+
+ventas<-ventas%>%
+  mutate(ubi=geocode(Country, source = "google"))
+
+
+ggmap(get_googlemap(center = "United Kingdom", zoom=1, maptype = "terrain",color="color"))+
+  geom_point(data=ventas, aes(x=ventas$longitud, y=ventas$latitud, size = ventas$n), color="red")
+
+#b
+df2$total=df2$UnitPrice*df2$Quantity
+ppromedio<-df2%>%
+  group_by(InvoiceNo, Country)%>%
+  summarise(media=mean(total))%>%
+  ungroup()%>%
+  group_by(Country)%>%
+  summarise(mediaPais=mean(media))%>%
+  arrange(desc(mediaPais))
+
+ppromedio<-ppromedio%>%
+  mutate(ubi=geocode(Country, source = "google"))  
+
+ggmap(get_googlemap(center="United Kingdom", zoom=1, maptype = "terrain", color="color"))+
+  geom_point(data=ppromedio, aes(x=ppromedio$ubi$lon, y =ppromedio$ubi$lat, size=ppromedio$mediaPais), color="blue")
+
+#c
+cantC<-df2%>%
+  distinct(CustomerID, Country)%>%
+  group_by(Country)%>%
+  count()
 
 
 
