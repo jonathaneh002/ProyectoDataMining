@@ -97,9 +97,6 @@ ggplot(df, aes(x=UnitPrice)) +
   xlab('Precio')+
   ggtitle('Distribucion de precios')
 
-ggplot(ToothGrowth, aes(x=dose, y=len, color=dose)) +
-  geom_boxplot()
-
 #Country
 
 df %>%
@@ -504,6 +501,9 @@ ventas<-df2%>%
   group_by(Country)%>%
   count()
 
+#csv
+write.csv(ventas, 'Ventas.csv')
+
 ventas<-ventas%>%
   mutate(ubi=geocode(Country, source = "google"))
 
@@ -562,9 +562,13 @@ ggmap(get_googlemap(center="Mali", zoom=1, maptype = "terrain",color="color"))+
   guides(color=F)+
   labs(x="Longitud",y="Latitud", size="Cantidad Productos")+
   ggtitle("Cantidad de Productos por país")
-  
 
 
+#csv
 
+write.csv(ventas, 'Ventas.csv')
+write.csv(ppromedio, 'ppromedio.csv')
+write.csv(cantC, 'cantC.csv')
+write.csv(cantP, 'cantP.csv')
 
 
