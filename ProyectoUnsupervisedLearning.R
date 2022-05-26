@@ -5,6 +5,8 @@ library('lubridate')
 library(readxl)
 library(countrycode)
 library(arules)
+library(ggmap)
+library(geosphere)
 
 ############################################
 #                                          #
@@ -142,7 +144,10 @@ df2%>%
   group_by(Region)%>%
   count()%>%
   ggplot(aes(x=Region, y=n))+
-  geom_col()
+  geom_col()+
+  labs(y="Cantidad")+
+  ggtitle("Cantidad de productos diferentes por region")+
+  theme_bw()
   
 
 #Como se comporta la cantidad de usuarios por pais?
@@ -153,7 +158,8 @@ df2%>%
   arrange(desc(n))%>%
   ggplot(aes(x=reorder(Country, n), y=n))+
   geom_col()+
-  coord_flip()
+  coord_flip()+
+  labs(x="Country", y="Cantidad")
   
   
 #¿Como se ha comportado el precio de los top 10 productos a lo largo del tiempo?
@@ -168,7 +174,9 @@ df2%>%
   distinct(StockCode, date, UnitPrice)%>%
   ggplot(aes(x=month(date), y=UnitPrice))+
     geom_smooth()+
-    facet_wrap(~ StockCode, scales = "free_y")
+    facet_wrap(~ StockCode, scales = "free_y")+
+    labs(x="mes")+
+    ggtitle("Linea del tiempo de precio de los top 10 productos")
 
 
 
@@ -185,7 +193,54 @@ inspect(trans[1:5])
 itemFrequencyPlot(trans, topN = 20)
 itemFrequencyPlot(trans, support = 0.05)
 image(sample(trans, 1000))
-rules<-apriori(trans, parameter=list(suppor=0.025, confidence = 0.3, minlen=2))
+rules<-apriori(trans, parameter=list(suppor=0.025, confidence = 0.2, minlen=2))
 summary(rules)
 inspect(sort(rules, by="lift"))
+rulesdf<-as(rules, "data.frame")
+
+#3 geografia analitica
+#a ventas
+apikey = "AIzaSyAzIPOLbTCkY-vMQtQJ7nXNk3ytvs8NlSU"
+
+register_google(key = apikey)
+
+ventas<-df2%>%
+  distinct(Country, InvoiceNo)%>%
+  group_by(Country)%>%
+  count()
+
+ventas<-ventas%>%
+  mutate(ubi=geocode(Country, source = "google"))
+
+
+ggmap(get_googlemap(center = "United Kingdom", zoom=1, maptype = "terrain",color="color"))+
+  geom_point(data=ventas, aes(x=ventas$longitud, y=ventas$latitud, size = ventas$n), color="red")
+
+
+#b
+df2$total=df2$UnitPrice*df2$Quantity
+ppromedio<-df2%>%
+  group_by(InvoiceNo, Country)%>%
+  summarise(media=mean(total))%>%
+  ungroup()%>%
+  group_by(Country)%>%
+  summarise(mediaPais=mean(media))%>%
+  arrange(desc(mediaPais))
+
+ppromedio<-ppromedio%>%
+  mutate(ubi=geocode(Country, source = "google"))  
+
+ggmap(get_googlemap(center="United Kingdom", zoom=1, maptype = "terrain", color="color"))+
+  geom_point(data=ppromedio, aes(x=ppromedio$ubi$lon, y =ppromedio$ubi$lat, size=ppromedio$mediaPais), color="blue")
+
+
+#c
+cantC<-df2%>%
+  distinct(CustomerID, Country)%>%
+  group_by(Country)%>%
+  count()
+
+
+
+
 
