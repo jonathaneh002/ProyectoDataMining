@@ -213,9 +213,10 @@ ventas<-ventas%>%
   mutate(ubi=geocode(Country, source = "google"))
 
 
-ggmap(get_googlemap(center = "United Kingdom", zoom=1, maptype = "terrain",color="color"))+
-  geom_point(data=ventas, aes(x=ventas$longitud, y=ventas$latitud, size = ventas$n), color="red")
-
+ggmap(get_googlemap(center = "Mali", zoom=1, maptype = "terrain",color="color"))+
+  geom_point(data=ventas, aes(x=ventas$longitud, y=ventas$latitud, size = ventas$n), color="red")+
+  labs(x="Longitud",y="Latitud",size="Ventas")+
+  ggtitle("Ventas por país")
 
 #b
 df2$total=df2$UnitPrice*df2$Quantity
@@ -230,8 +231,10 @@ ppromedio<-df2%>%
 ppromedio<-ppromedio%>%
   mutate(ubi=geocode(Country, source = "google"))  
 
-ggmap(get_googlemap(center="United Kingdom", zoom=1, maptype = "terrain", color="color"))+
-  geom_point(data=ppromedio, aes(x=ppromedio$ubi$lon, y =ppromedio$ubi$lat, size=ppromedio$mediaPais), color="blue")
+ggmap(get_googlemap(center= "Mali",zoom=1, maptype = "terrain", color="color"))+
+  geom_point(data=ppromedio, aes(x=ppromedio$ubi$lon, y =ppromedio$ubi$lat, size=ppromedio$mediaPais), color="blue")+
+  labs(x="Longitud",y="Latitud", size="Precio promedio")+
+  ggtitle("Precio promedio por país")
 
 
 #c
@@ -239,6 +242,32 @@ cantC<-df2%>%
   distinct(CustomerID, Country)%>%
   group_by(Country)%>%
   count()
+
+cantC<-cantC%>%
+  mutate(ubi=geocode(Country, source = "google")) 
+
+ggmap(get_googlemap(center="Mali", zoom=1, maptype = "terrain", color="color"))+
+  geom_point(data=cantC, aes(x=cantC$ubi$lon, y=cantC$ubi$lat, size=cantC$n), color="dark green")+
+  labs(x="Longitud",y="Latitud", size="Cantidad Clientes")+
+  ggtitle("Cantidad de clientes por país")
+
+
+#d
+cantP<-df2%>%
+  distinct(StockCode, Country)%>%
+  group_by(Country)%>%
+  count()%>%
+  arrange(desc(n))
+
+cantP<-cantP%>%
+  mutate(ubi=geocode(Country, source = "google"))
+
+ggmap(get_googlemap(center="Mali", zoom=1, maptype = "terrain",color="color"))+
+  geom_point(data=cantP, aes(x=cantP$ubi$lon, y=cantP$ubi$lat, size=cantP$n, color="orange"))+
+  guides(color=F)+
+  labs(x="Longitud",y="Latitud", size="Cantidad Productos")+
+  ggtitle("Cantidad de Productos por país")
+  
 
 
 
